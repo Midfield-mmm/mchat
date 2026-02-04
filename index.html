@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>MChat - Messagerie &amp; Appels</title>
+    
+    <meta property="og:title" content="MChat - Messagerie &amp; Appels"/>
+    <meta property="og:description" content="Connectez-vous avec vos amis via messagerie et appels vidéo sur MChat"/>
+    <meta property="og:type" content="website"/>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { poppins: ['Poppins', 'sans-serif'] },
+                    colors: {
+                        primary: {
+                            50: '#faf5ff', 100: '#f3e8ff', 200: '#e9d5ff', 300: '#d8b4fe',
+                            400: '#c084fc', 500: '#a855f7', 600: '#9333ea', 700: '#7e22ce',
+                            800: '#6b21a8', 900: '#581c87'
+                        },
+                        accent: { 400: '#f472b6', 500: '#ec4899', 600: '#db2777' }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        * { font-family: 'Poppins', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #9333ea 0%, #ec4899 50%, #f97316 100%); }
+        .gradient-text { background: linear-gradient(135deg, #9333ea, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .message-bubble { animation: slideIn 0.3s ease-out; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse-ring { 0% { transform: scale(0.8); opacity: 1; } 100% { transform: scale(2); opacity: 0; } }
+        .pulse-ring { animation: pulse-ring 1.5s ease-out infinite; }
+        .chat-container::-webkit-scrollbar { width: 6px; }
+        .chat-container::-webkit-scrollbar-thumb { background: rgba(168, 85, 247, 0.3); border-radius: 3px; }
+        .status-online { width: 12px; height: 12px; background: #10b981; border-radius: 50%; display: inline-block; }
+        .status-offline { width: 12px; height: 12px; background: #6b7280; border-radius: 50%; display: inline-block; }
+    </style>
+</head>
+<body class="font-poppins bg-gray-50 min-h-screen">
+    
+    <!-- Splash Screen -->
+    <div id="splash-screen" class="fixed inset-0 gradient-bg flex items-center justify-center z-50">
+        <div class="text-center">
+            <div class="w-24 h-24 bg-white rounded-3xl flex items-center justify-center mb-6 mx-auto shadow-2xl">
+                <span class="text-5xl font-extrabold gradient-text">M</span>
+            </div>
+            <h1 class="text-4xl font-bold text-white mb-2">MChat</h1>
+            <p class="text-white/80 text-lg">Connectez-vous autrement</p>
+            <div class="mt-8">
+                <div class="w-12 h-12 border-4 border-white/30 border-t-white rounded-full animate-spin mx-auto"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Registration Screen -->
+    <div id="register-screen" class="hidden min-h-screen">
+        <div class="gradient-bg py-12 px-6">
+            <div class="text-center">
+                <div class="w-20 h-20 bg-white rounded-2xl flex items-center justify-center mb-4 mx-auto shadow-xl">
+                    <span class="text-4xl font-extrabold gradient-text">M</span>
+                </div>
+                <h1 class="text-3xl font-bold text-white mb-2">Bienvenue sur MChat</h1>
+                <p class="text-white/80">Créez votre compte en quelques secondes</p>
+            </div>
+        </div>
+        
+        <div class="px-6 -mt-8">
+            <div class="bg-white rounded-3xl shadow-xl p-6 max-w-md mx-auto">
+                <form id="register-form" class="space-y-5">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-at text-primary-500 mr-2"></i>Votre adresse M
+                        </label>
+                        <div class="flex items-center">
+                            <input type="text" id="m-address" placeholder="votre.pseudo" class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-l-xl focus:border-primary-500 focus:ring-0 outline-none" required/>
+                            <span class="px-4 py-3 bg-gradient-to-r from-primary-500 to-accent-500 text-white font-semibold rounded-r-xl">@mchat.app</span>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-user text-primary-500 mr-2"></i>Prénom
+                        </label>
+                        <input type="text" id="first-name" placeholder="Votre prénom" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary-500 focus:ring-0 outline-none" required/>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-user-tag text-primary-500 mr-2"></i>Nom
+                        </label>
+                        <input type="text" id="last-name" placeholder="Votre nom" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary-500 focus:ring-0 outline-none" required/>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-signature text-primary-500 mr-2"></i>Pseudo d'affichage
+                        </label>
+                        <input type="text" id="display-name" placeholder="Comment voulez-vous être appelé ?" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary-500 focus:ring-0 outline-none" required/>
+                    </div>
+                    
+                    <button type="submit" class="w-full py-4 gradient-bg text-white font-bold text-lg rounded-xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98] transition-all">
+                        Continuer !!!
+                        <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="main-app" class="hidden min-h-screen bg-gray-100">
+        <header class="gradient-bg px-4 py-4 sticky top-0 z-40">
+            <div class="flex items-center justify-between max-w-lg mx-auto">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center">
+                        <span class="text-xl font-bold gradient-text">M</span>
+                    </div>
+                    <div>
+                        <h1 class="text-white font-bold text-lg">MChat</h1>
+                        <p id="user-greeting" class="text-white/70 text-xs"></p>
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="showAddContact()" class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-white hover:bg-white/30">
+                        <i class="fas fa-user-plus"></i>
+                    </button>
+                    <button onclick="showProfile()" class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-white hover:bg-white/30">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <nav class="bg-white shadow-sm sticky top-16 z-30">
+            <div class="flex max-w-lg mx-auto">
+                <button onclick="showTab('messages')" id="tab-messages" class="flex-1 py-3 text-center font-semibold text-primary-600 border-b-2 border-primary-500">
+                    <i class="fas fa-comment-dots mr-2"></i>Messages
+                </button>
+                <button onclick="showTab('contacts')" id="tab-contacts" class="flex-1 py-3 text-center font-semibold text-gray-500 border-b-2 border-transparent">
+                    <i class="fas fa-users mr-2"></i>Contacts
+                </button>
+            </div>
+        </nav>
+
+        <div id="messages-tab" class="max-w-lg mx-auto p-4">
+            <div class="relative mb-4">
+                <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                <input type="text" placeholder="Rechercher une conversation..." class="w-full pl-12 pr-4 py-3 bg-white rounded-xl border-0 shadow-sm focus:ring-2 focus:ring-primary-500 outline-none"/>
+            </div>
+            <div id="empty-conversations" class="text-center py-16">
+                <div class="w-24 h-24 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-comments text-4xl text-primary-400"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-700 mb-2">Aucune conversation</h3>
+                <p class="text-gray-500 mb-6">Commencez à chatter !</p>
+            </div>
+            <div id="conversations-list" class="space-y-3"></div>
+        </div>
+
+        <div id="contacts-tab" class="hidden max-w-lg mx-auto p-4">
+            <div class="relative mb-4">
+                <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                <input type="text" id="contact-search" oninput="filterContacts()" placeholder="Rechercher un contact..." class="w-full pl-12 pr-4 py-3 bg-white rounded-xl border-0 shadow-sm focus:ring-2 focus:ring-primary-500 outline-none"/>
+            </div>
+            <div id="empty-contacts" class="text-center py-16">
+                <div class="w-24 h-24 bg-accent-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-user-friends text-4xl text-accent-400"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-700 mb-2">Aucun contact</h3>
+                <p class="text-gray-500 mb-6">Ajoutez des amis !</p>
+                <button onclick="showAddContact()" class="px-6 py-3 gradient-bg text-white font-semibold rounded-xl">
+                    <i class="fas fa-user-plus mr-2"></i>Ajouter un contact
+                </button>
+            </div>
+            <div id="contacts-list" class="space-y-3"></div>
+        </div>
+    </div>
+
+    <!-- Add Contact Modal -->
+    <div id="add-contact-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center">
+        <div class="bg-white w-full sm:max-w-md sm:rounded-2xl rounded-t-3xl p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-bold text-gray-800">Ajouter un contact</h2>
+                <button onclick="hideAddContact()" class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-500">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="add-contact-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Adresse M du contact</label>
+                    <div class="flex items-center">
+                        <input type="text" id="contact-address" placeholder="pseudo.ami" class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-l-xl focus:border-primary-500 focus:ring-0 outline-none" required/>
+                        <span class="px-3 py-3 bg-gray-100 text-gray-600 font-medium rounded-r-xl border-2 border-l-0 border-gray-200">@mchat.app</span>
+                    </div>
+                </div>
+                <button type="submit" class="w-full py-4 gradient-bg text-white font-bold rounded-xl">
+                    <i class="fas fa-plus mr-2"></i>Ajouter le contact
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Chat Screen -->
+    <div id="chat-screen" class="hidden fixed inset-0 bg-gray-100 z-50 flex flex-col">
+        <header class="gradient-bg px-4 py-3">
+            <div class="flex items-center justify-between max-w-lg mx-auto">
+                <div class="flex items-center gap-3">
+                    <button onclick="hideChat()" class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-white">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <div id="chat-contact-avatar" class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-primary-600 font-bold"></div>
+                    <div>
+                        <h2 id="chat-contact-name" class="text-white font-semibold"></h2>
+                        <p id="chat-status" class="text-white/70 text-xs"><span class="status-online"></span> En ligne</p>
+                    </div>
+                </div>
+                <button onclick="startVideoCall()" class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-white hover:bg-white/30">
+                    <i class="fas fa-video text-lg"></i>
+                </button>
+            </div>
+        </header>
+
+        <div id="chat-messages" class="flex-1 overflow-y-auto p-4 chat-container max-w-lg mx-auto w-full"></div>
+
+        <div class="bg-white border-t p-4">
+            <div class="flex items-center gap-3 max-w-lg mx-auto">
+                <input type="text" id="message-input" placeholder="Écrivez un message..." class="flex-1 px-4 py-3 bg-gray-100 rounded-full focus:ring-2 focus:ring-primary-500 outline-none" onkeypress="if(event.key === 'Enter') sendMessage()"/>
+                <button onclick="sendMessage()" class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center text-white shadow-lg">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Incoming Call Modal -->
+    <div id="incoming-call-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+        <div class="bg-white rounded-3xl p-8 max-w-sm text-center">
+            <div id="incoming-avatar" class="w-24 h-24 gradient-bg rounded-full flex items-center justify-center mx-auto mb-4 text-4xl text-white font-bold"></div>
+            <h2 id="incoming-name" class="text-2xl font-bold text-gray-800 mb-2"></h2>
+            <p class="text-gray-500 mb-6">vous appelle...</p>
+            <div class="flex gap-4 justify-center">
+                <button onclick="acceptCall()" class="px-8 py-4 bg-green-500 text-white font-bold rounded-xl hover:bg-green-600">
+                    <i class="fas fa-phone mr-2"></i>Accepter
+                </button>
+                <button onclick="rejectCall()" class="px-8 py-4 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600">
+                    <i class="fas fa-phone-slash mr-2"></i>Refuser
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Video Call Screen -->
+    <div id="video-call-screen" class="hidden fixed inset-0 bg-gray-900 z-50 flex flex-col">
+        <div class="absolute inset-0 bg-gradient-to-br from-primary-900 via-gray-900 to-accent-900 flex items-center justify-center">
+            <div class="text-center">
+                <div id="call-avatar" class="w-32 h-32 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-6 text-5xl text-white font-bold relative">
+                    <div class="absolute inset-0 rounded-full bg-primary-500/30 pulse-ring"></div>
+                    <span id="call-avatar-letter"></span>
+                </div>
+                <h2 id="call-contact-name" class="text-white text-2xl font-bold mb-2"></h2>
+                <p id="call-status" class="text-white/70">Appel en cours...</p>
+            </div>
+        </div>
+
+        <video id="remote-video" class="absolute top-20 right-4 w-32 h-44 bg-gray-800 rounded-2xl object-cover shadow-xl border-2 border-white/20"></video>
+        <video id="local-video" class="absolute bottom-24 right-4 w-24 h-32 bg-gray-800 rounded-2xl object-cover shadow-xl border-2 border-white/20" muted></video>
+
+        <div class="absolute top-6 left-1/2 -translate-x-1/2 px-4 py-2 bg-black/30 rounded-full">
+            <span id="call-timer" class="text-white font-medium">00:00</span>
+        </div>
+
+        <div class="absolute bottom-0 left-0 right-0 p-8">
+            <div class="flex items-center justify-center gap-6">
+                <button onclick="toggleMute()" id="mute-btn" class="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center text-white hover:bg-white/30">
+                    <i class="fas fa-microphone text-xl"></i>
+                </button>
+                <button onclick="toggleCamera()" id="camera-btn" class="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center text-white hover:bg-white/30">
+                    <i class="fas fa-video text-xl"></i>
+                </button>
+                <button onclick="endCall()" class="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center text-white shadow-lg hover:bg-red-600">
+                    <i class="fas fa-phone-slash text-2xl"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Modal -->
+    <div id="profile-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center">
+        <div class="bg-white w-full sm:max-w-md sm:rounded-2xl rounded-t-3xl p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-bold text-gray-800">Mon Profil</h2>
+                <button onclick="hideProfile()" class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="text-center mb-6">
+                <div id="profile-avatar" class="w-24 h-24 gradient-bg rounded-full flex items-center justify-center mx-auto mb-4 text-4xl text-white font-bold"></div>
+                <h3 id="profile-display-name" class="text-xl font-bold text-gray-800"></h3>
+                <p id="profile-m-address" class="text-primary-500 font-medium"></p>
+            </div>
+            <div class="space-y-3 mb-6">
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                    <span class="text-gray-600"><i class="fas fa-user mr-3 text-primary-500"></i>Nom complet</span>
+                    <span id="profile-full-name" class="font-semibold text-gray-800"></span>
+                </div>
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                    <span class="text-gray-600"><i class="fas fa-users mr-3 text-primary-500"></i>Contacts</span>
+                    <span id="profile-contacts-count" class="font-semibold text-gray-800">0</span>
+                </div>
+            </div>
+            <button onclick="logout()" class="w-full py-4 bg-red-50 text-red-600 font-semibold rounded-xl hover:bg-red-100">
+                <i class="fas fa-sign-out-alt mr-2"></i>Se déconnecter
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const SERVER_URL = 'http://localhost:3000';
+        const socket = io(SERVER_URL);
+
+        let currentUser = null;
+        let friends = [];
+        let conversations = {};
+        let currentChat = null;
+        let peerConnections = {};
+        let localStream = null;
+        let callTimer = null;
+        let callSeconds = 0;
+        let isMuted = false;
+        let isCameraOff = false;
+        let incomingCall = null;
+
+        // ===== REGISTRATION =====
+        document.getElementById('register-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const mAddress = document.getElementById('m-address').value.toLowerCase().replace(/\s/g, '') + '@mchat.app';
+            const displayName = document.getElementById('display-name').value;
+            const firstName = document.getElementById('first-name').value;
+            const lastName = document.getElementById('last-name').value;
+
+            currentUser = { mAddress, displayName, firstName, lastName };
+            socket.emit('login', { mAddress, displayName, firstName, lastName });
+            showMainApp();
+        });
+
+        // ===== SOCKET EVENTS =====
+        socket.on('online-users', (users) => {
+            friends = users;
+            renderContacts();
+        });
+
+        socket.on('user-online', (user) => {
+            friends.push(user);
+            renderContacts();
+            renderConversations();
+        });
+
+        socket.on('user-offline', (mAddress) => {
+            friends = friends.filter(f => f.mAddress !== mAddress);
+            renderContacts();
+            renderConversations();
+        });
+
+        socket.on('message', ({ from, text, displayName }) => {
+            if (!conversations[from]) conversations[from] = [];
+            conversations[from].push({ from, text, displayName });
+            if (currentChat === from) renderChatMessages();
+            renderConversations();
+        });
+
+        socket.on('friend-added', (friend) => {
+            friends.push(friend);
+            renderContacts();
+        });
+
+        socket.on('friend-not-found', ({ mAddress }) => {
+            alert('Ami introuvable: ' + mAddress);
+        });
+
+        socket.on('incoming-call', ({ from, displayName }) => {
+            incomingCall = { from, displayName };
+            document.getElementById('incoming-avatar').textContent = displayName[0].toUpperCase();
+            document.getElementById('incoming-name').textContent = displayName;
+            document.getElementById('incoming-call-modal').classList.remove('hidden');
+        });
+
+        socket.on('call-accepted', ({ to }) => {
+            currentChat = to;
+            startLocalStream().then(() => createPeerConnection(to, true));
+        });
+
+        socket.on('call-rejected', ({ to }) => {
+            endCall();
+            alert('Appel refusé');
+        });
+
+        socket.on('call-ended', ({ from }) => {
+            endCall();
+        });
+
+        socket.on('webrtc-signal', async ({ from, data }) => {
+            let pc = peerConnections[from];
+            if (!pc) {
+                await startLocalStream();
+                createPeerConnection(from, false);
+                pc = peerConnections[from];
+            }
+
+            if (data.type === 'offer') {
+                await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
+                const answer = await pc.createAnswer();
+                await pc.setLocalDescription(answer);
+                socket.emit('webrtc-signal', { to: from, data: { type: 'answer', answer } });
+            } else if (data.type === 'answer') {
+                await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+            } else if (data.type === 'candidate' && data.candidate) {
+                try { await pc.addIceCandidate(new RTCIceCandidate(data.candidate)); } catch (e) {}
+            }
+        });
+
+        // ===== FUNCTIONS =====
+        function showMainApp() {
+            document.getElementById('splash-screen').classList.add('hidden');
+            document.getElementById('register-screen').classList.add('hidden');
+            document.getElementById('main-app').classList.remove('hidden');
+            document.getElementById('user-greeting').textContent = `Bonjour, ${currentUser.displayName}`;
+            renderContacts();
+        }
+
+        function showTab(tab) {
+            const tabMessages = document.getElementById('tab-messages');
+            const tabContacts = document.getElementById('tab-contacts');
+            if (tab === 'messages') {
+                tabMessages.classList.add('text-primary-600', 'border-primary-500');
+                tabMessages.classList.remove('text-gray-500', 'border-transparent');
+                tabContacts.classList.remove('text-primary-600', 'border-primary-500');
+                tabContacts.classList.add('text-gray-500', 'border-transparent');
+                document.getElementById('messages-tab').classList.remove('hidden');
+                document.getElementById('contacts-tab').classList.add('hidden');
+            } else {
+                tabContacts.classList.add('text-primary-600', 'border-primary-500');
+                tabContacts.classList.remove('text-gray-500', 'border-transparent');
+                tabMessages.classList.remove('text-primary-600', 'border-primary-500');
+                tabMessages.classList.add('text-gray-500', 'border-transparent');
+                document.getElementById('contacts-tab').classList.remove('hidden');
+                document.getElementById('messages-tab').classList.add('hidden');
+            }
+        }
+
+        function renderContacts() {
+            const list = document.getElementById('contacts-list');
+            const empty = document.getElementById('empty-contacts');
+            if (friends.length === 0) {
+                empty.classList.remove('hidden');
+                list.innerHTML = '';
+                return;
+            }
+            empty.classList.add('hidden');
+            list.innerHTML = friends.map(friend => `
+                <div class="bg-white rounded-xl p-4 shadow-sm flex items-center justify-between hover:shadow-md cursor-pointer" onclick="openChat('${friend.mAddress}')">
+                    <div class="flex items-center gap-3">
+                        <div class="relative">
+                            <div class="w-12 h-12 rounded-full gradient-bg flex items-center justify-center text-white font-bold text-lg">
+                                ${friend.displayName[0].toUpperCase()}
+                            </div>
+                            <span class="absolute bottom-0 right-0 w-3 h-3 ${friend.isOnline ? 'bg-green-500' : 'bg-gray-400'} rounded-full border-2 border-white"></span>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-800">${friend.displayName}</h3>
+                            <p class="text-sm text-gray-500">${friend.mAddress}</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="event.stopPropagation(); openChat('${friend.mAddress}')" class="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center text-primary-600 hover:bg-primary-200">
+                            <i class="fas fa-comment"></i>
+                        </button>
+                        <button onclick="event.stopPropagation(); startVideoCall('${friend.mAddress}')" class="w-10 h-10 bg-accent-100 rounded-full flex items-center justify-center text-accent-600 hover:bg-accent-200" ${friend.isOnline ? '' : 'disabled'}>
+                            <i class="fas fa-video"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderConversations() {
+            const list = document.getElementById('conversations-list');
+            const empty = document.getElementById('empty-conversations');
+            const convEntries = Object.entries(conversations);
+            if (convEntries.length === 0) {
+                empty.classList.remove('hidden');
+                list.innerHTML = '';
+                return;
+            }
+            empty.classList.add('hidden');
+            list.innerHTML = convEntries.map(([addr, msgs]) => {
+                const friend = friends.find(f => f.mAddress === addr);
+                const lastMsg = msgs[msgs.length - 1];
+                return `
+                    <div class="bg-white rounded-xl p-4 shadow-sm flex items-center gap-3 hover:shadow-md cursor-pointer" onclick="openChat('${addr}')">
+                        <div class="relative">
+                            <div class="w-14 h-14 rounded-full gradient-bg flex items-center justify-center text-white font-bold text-xl">
+                                ${friend?.displayName[0].toUpperCase() || addr[0]}
+                            </div>
+                            <span class="absolute bottom-0 right-0 w-4 h-4 ${friend?.isOnline ? 'bg-green-500' : 'bg-gray-400'} rounded-full border-2 border-white"></span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between">
+                                <h3 class="font-semibold text-gray-800">${friend?.displayName || addr}</h3>
+                            </div>
+                            <p class="text-sm text-gray-500 truncate">${lastMsg.text}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function filterContacts() {
+            const search = document.getElementById('contact-search').value.toLowerCase();
+            document.querySelectorAll('#contacts-list > div').forEach(item => {
+                item.style.display = item.textContent.toLowerCase().includes(search) ? 'flex' : 'none';
+            });
+        }
+
+        function showAddContact() {
+            document.getElementById('add-contact-modal').classList.remove('hidden');
+        }
+
+        function hideAddContact() {
+            document.getElementById('add-contact-modal').classList.add('hidden');
+            document.getElementById('add-contact-form').reset();
+        }
+
+        document.getElementById('add-contact-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const address = document.getElementById('contact-address').value.toLowerCase().replace(/\s/g, '') + '@mchat.app';
+            socket.emit('add-friend', { friendAddress: address });
+            hideAddContact();
+        });
+
+        function openChat(address) {
+            currentChat = address;
+            const friend = friends.find(f => f.mAddress === address);
+            document.getElementById('chat-contact-name').textContent = friend?.displayName || address;
+            document.getElementById('chat-contact-avatar').textContent = (friend?.displayName || address)[0].toUpperCase();
+            document.getElementById('chat-status').innerHTML = `<span class="status-${friend?.isOnline ? 'online' : 'offline'}"></span> ${friend?.isOnline ? 'En ligne' : 'Hors ligne'}`;
+            renderChatMessages();
+            document.getElementById('chat-screen').classList.remove('hidden');
+        }
+
+        function hideChat() {
+            document.getElementById('chat-screen').classList.add('hidden');
+            currentChat = null;
+        }
+
+        function renderChatMessages() {
+            const container = document.getElementById('chat-messages');
+            const messages = conversations[currentChat] || [];
+            container.innerHTML = messages.map(msg => {
+                const isMe = msg.from === 'me';
+                return `
+                    <div class="flex ${isMe ? 'justify-end' : 'justify-start'} mb-3 message-bubble">
+                        <div class="${isMe ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white' : 'bg-white text-gray-800'} px-4 py-3 rounded-2xl ${isMe ? 'rounded-br-md' : 'rounded-bl-md'} max-w-[80%] shadow-sm">
+                            <p>${msg.text}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('message-input');
+            const text = input.value.trim();
+            if (!text || !currentChat) return;
+
+            socket.emit('message', { to: currentChat, text });
+            if (!conversations[currentChat]) conversations[currentChat] = [];
+            conversations[currentChat].push({ from: 'me', text });
+            renderChatMessages();
+            input.value = '';
+            renderConversations();
+        }
+
+        async function startLocalStream() {
+            if (!localStream) {
+                localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                document.getElementById('local-video').srcObject = localStream;
+            }
+        }
+
+        function createPeerConnection(friendAddress, isCaller) {
+            let pc = new RTCPeerConnection({ 
+                iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+            });
+
+            localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+
+            pc.ontrack = event => {
+                document.getElementById('remote-video').srcObject = event.streams[0];
+            };
+
+            pc.onicecandidate = e => {
+                if (e.candidate) {
+                    socket.emit('webrtc-signal', { to: friendAddress, data: { type: 'candidate', candidate: e.candidate } });
+                }
+            };
+
+            pc.onconnectionstatechange = () => {
+                if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') {
+                    endCall();
+                }
+            };
+
+            if (isCaller) {
+                pc.createOffer().then(offer => {
+                    pc.setLocalDescription(offer);
+                    socket.emit('webrtc-signal', { to: friendAddress, data: { type: 'offer', offer } });
+                });
+            }
+
+            peerConnections[friendAddress] = pc;
+            showVideoCall(friendAddress);
+        }
+
+        function showVideoCall(address) {
+            const friend = friends.find(f => f.mAddress === address);
+            document.getElementById('call-avatar-letter').textContent = friend?.displayName[0].toUpperCase() || 'U';
+            document.getElementById('call-contact-name').textContent = friend?.displayName || address;
+            document.getElementById('video-call-screen').classList.remove('hidden');
+            startCallTimer();
+        }
+
+        function startVideoCall(address) {
+            currentChat = address;
+            socket.emit('call-request', { to: address });
+        }
+
+        function acceptCall() {
+            document.getElementById('incoming-call-modal').classList.add('hidden');
+            socket.emit('call-accept', { from: incomingCall.from });
+            startLocalStream().then(() => {
+                currentChat = incomingCall.from;
+                createPeerConnection(incomingCall.from, false);
+            });
+        }
+
+        function rejectCall() {
+            document.getElementById('incoming-call-modal').classList.add('hidden');
+            socket.emit('call-reject', { from: incomingCall.from });
+        }
+
+        function startCallTimer() {
+            callSeconds = 0;
+            callTimer = setInterval(() => {
+                callSeconds++;
+                const mins = Math.floor(callSeconds / 60).toString().padStart(2, '0');
+                const secs = (callSeconds % 60).toString().padStart(2, '0');
+                document.getElementById('call-timer').textContent = `${mins}:${secs}`;
+            }, 1000);
+        }
+
+        function toggleMute() {
+            isMuted = !isMuted;
+            if (localStream) {
+                localStream.getAudioTracks().forEach(track => track.enabled = !isMuted);
+            }
+            updateCallButtons();
+        }
+
+        function toggleCamera() {
+            isCameraOff = !isCameraOff;
+            if (localStream) {
+                localStream.getVideoTracks().forEach(track => track.enabled = !isCameraOff);
+            }
+            updateCallButtons();
+        }
+
+        function updateCallButtons() {
+            const muteBtn = document.getElementById('mute-btn');
+            const cameraBtn = document.getElementById('camera-btn');
+            muteBtn.innerHTML = isMuted ? '<i class="fas fa-microphone-slash text-xl"></i>' : '<i class="fas fa-microphone text-xl"></i>';
+            muteBtn.className = `w-14 h-14 ${isMuted ? 'bg-red-500' : 'bg-white/20'} rounded-full flex items-center justify-center text-white hover:opacity-80`;
+            cameraBtn.innerHTML = isCameraOff ? '<i class="fas fa-video-slash text-xl"></i>' : '<i class="fas fa-video text-xl"></i>';
+            cameraBtn.className = `w-14 h-14 ${isCameraOff ? 'bg-red-500' : 'bg-white/20'} rounded-full flex items-center justify-center text-white hover:opacity-80`;
+        }
+
+        function endCall() {
+            if (currentChat) socket.emit('call-end', { to: currentChat });
+            if (callTimer) clearInterval(callTimer);
+            if (localStream) localStream.getTracks().forEach(track => track.stop());
+            Object.values(peerConnections).forEach(pc => pc.close());
+            peerConnections = {};
+            localStream = null;
+            document.getElementById('video-call-screen').classList.add('hidden');
+            isMuted = false;
+            isCameraOff = false;
+            updateCallButtons();
+        }
+
+        function showProfile() {
+            document.getElementById('profile-avatar').textContent = currentUser.displayName[0].toUpperCase();
+            document.getElementById('profile-display-name').textContent = currentUser.displayName;
+            document.getElementById('profile-m-address').textContent = currentUser.mAddress;
+            document.getElementById('profile-full-name').textContent = `${currentUser.firstName} ${currentUser.lastName}`;
+            document.getElementById('profile-contacts-count').textContent = friends.length;
+            document.getElementById('profile-modal').classList.remove('hidden');
+        }
+
+        function hideProfile() {
+            document.getElementById('profile-modal').classList.add('hidden');
+        }
+
+        function logout() {
+            socket.disconnect();
+            localStorage.clear();
+            location.reload();
+        }
+
+        document.getElementById('add-contact-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'add-contact-modal') hideAddContact();
+        });
+        document.getElementById('profile-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'profile-modal') hideProfile();
+        });
+    </script>
+
+</body>
+</html>
