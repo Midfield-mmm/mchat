@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>MChat - Messagerie &amp; Appels</title>
 
-<meta property="og:title" content="MChat - Messagerie &amp; Appels"/>
+<meta property="og:title" content="MChat-messagerie & appels"/>
 <meta property="og:description" content="Connectez-vous avec vos amis via messagerie et appels vidéo sur MChat"/>
 <meta property="og:type" content="website"/>
 
@@ -70,8 +70,8 @@ accent: { 400: '#f472b6', 500: '#ec4899', 600: '#db2777' }
 <div class="w-20 h-20 bg-white rounded-2xl flex items-center justify-center mb-4 mx-auto shadow-xl">
 <span class="text-4xl font-extrabold gradient-text">M</span>
 </div>
-<h1 class="text-3xl font-bold text-white mb-2">Bienvenue sur MChat</h1>
-<p class="text-white/80">Créez votre compte en quelques secondes</p>
+<h1 class="text-3xl font-bold text-white mb-2"><img src="https://image2url.com/r2/default/images/1770216707172-44e290b1-e419-4b71-ad80-ffaa3c7af9ea.png">Bienvenue sur MChat !</h1>
+<p class="text-white/80">Create my account | Créer mon compte</p>
 </div>
 </div>
 
@@ -90,27 +90,27 @@ accent: { 400: '#f472b6', 500: '#ec4899', 600: '#db2777' }
 
 <div>
 <label class="block text-sm font-semibold text-gray-700 mb-2">
-<i class="fas fa-user text-primary-500 mr-2"></i>Prénom
+<i class="fas fa-user text-primary-500 mr-2"></i>first name | prénom | ชื่อ
 </label>
-<input type="text" id="first-name" placeholder="Votre prénom" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary-500 focus:ring-0 outline-none" required/>
+<input type="text" id="first-name" placeholder="Your Name" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary-500 focus:ring-0 outline-none" required/>
 </div>
 
 <div>
 <label class="block text-sm font-semibold text-gray-700 mb-2">
-<i class="fas fa-user-tag text-primary-500 mr-2"></i>Nom
+<i class="fas fa-user-tag text-primary-500 mr-2"></i>Name | nom | ชื่อ
 </label>
 <input type="text" id="last-name" placeholder="Votre nom" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary-500 focus:ring-0 outline-none" required/>
 </div>
 
 <div>
 <label class="block text-sm font-semibold text-gray-700 mb-2">
-<i class="fas fa-signature text-primary-500 mr-2"></i>Pseudo d'affichage
+<i class="fas fa-signature text-primary-500 mr-2"></i>Je veut que l'on m'appelle... | ต้องการเรียกตัวเองว่า...
 </label>
-<input type="text" id="display-name" placeholder="Comment voulez-vous être appelé ?" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary-500 focus:ring-0 outline-none" required/>
+<input type="text" id="display-name" placeholder="Je veut qu'on m'appelle..." class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary-500 focus:ring-0 outline-none" required/>
 </div>
 
 <button type="submit" class="w-full py-4 gradient-bg text-white font-bold text-lg rounded-xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98] transition-all">
-Continuer !!!
+Continue ⇨!
 <i class="fas fa-arrow-right ml-2"></i>
 </button>
 </form>
@@ -147,10 +147,10 @@ Continuer !!!
 <nav class="bg-white shadow-sm sticky top-16 z-30">
 <div class="flex max-w-lg mx-auto">
 <button onclick="showTab('messages')" id="tab-messages" class="flex-1 py-3 text-center font-semibold text-primary-600 border-b-2 border-primary-500">
-<i class="fas fa-comment-dots mr-2"></i>Messages
+<i class="fas fa-comment-dots mr-2"></i>Chats
 </button>
 <button onclick="showTab('contacts')" id="tab-contacts" class="flex-1 py-3 text-center font-semibold text-gray-500 border-b-2 border-transparent">
-<i class="fas fa-users mr-2"></i>Contacts
+<i class="fas fa-users mr-2"></i>Contacts Book
 </button>
 </div>
 </nav>
@@ -159,14 +159,14 @@ Continuer !!!
 <div id="messages-tab" class="max-w-lg mx-auto p-4">
 <div class="relative mb-4">
 <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-<input type="text" placeholder="Rechercher une conversation..." class="w-full pl-12 pr-4 py-3 bg-white rounded-xl border-0 shadow-sm focus:ring-2 focus:ring-primary-500 outline-none"/>
+<input type="text" placeholder="Search|Rechercher dans les chats" class="w-full pl-12 pr-4 py-3 bg-white rounded-xl border-0 shadow-sm focus:ring-2 focus:ring-primary-500 outline-none"/>
 </div>
 <div id="empty-conversations" class="text-center py-16">
 <div class="w-24 h-24 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
 <i class="fas fa-comments text-4xl text-primary-400"></i>
 </div>
-<h3 class="text-xl font-semibold text-gray-700 mb-2">Aucune conversation</h3>
-<p class="text-gray-500 mb-6">Commencez à chatter !</p>
+<h3 class="text-xl font-semibold text-gray-700 mb-2">No Chat ! Chat now !</h3>
+<p class="text-gray-500 mb-6">Chat Now ! | Commencer à chatter</p>
 </div>
 <div id="conversations-list" class="space-y-3"></div>
 </div>
@@ -175,16 +175,16 @@ Continuer !!!
 <div id="contacts-tab" class="hidden max-w-lg mx-auto p-4">
 <div class="relative mb-4">
 <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-<input type="text" id="contact-search" oninput="filterContacts()" placeholder="Rechercher un contact..." class="w-full pl-12 pr-4 py-3 bg-white rounded-xl border-0 shadow-sm focus:ring-2 focus:ring-primary-500 outline-none"/>
+<input type="text" id="contact-search" oninput="filterContacts()" placeholder="Search| Rechercher dans les contacts" class="w-full pl-12 pr-4 py-3 bg-white rounded-xl border-0 shadow-sm focus:ring-2 focus:ring-primary-500 outline-none"/>
 </div>
 <div id="empty-contacts" class="text-center py-16">
 <div class="w-24 h-24 bg-accent-100 rounded-full flex items-center justify-center mx-auto mb-4">
 <i class="fas fa-user-friends text-4xl text-accent-400"></i>
 </div>
-<h3 class="text-xl font-semibold text-gray-700 mb-2">Aucun contact</h3>
-<p class="text-gray-500 mb-6">Ajoutez des amis !</p>
+<h3 class="text-xl font-semibold text-gray-700 mb-2">No contacts !</h3>
+<p class="text-gray-500 mb-6">Ajoutez des amis !  | Add friends</p>
 <button onclick="showAddContact()" class="px-6 py-3 gradient-bg text-white font-semibold rounded-xl">
-<i class="fas fa-user-plus mr-2"></i>Ajouter un contact
+<i class="fas fa-user-plus mr-2"></i>Ajouter un contact | Add contact
 </button>
 </div>
 <div id="contacts-list" class="space-y-3"></div>
@@ -196,7 +196,7 @@ Continuer !!!
 <div id="add-contact-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center">
 <div class="bg-white w-full sm:max-w-md sm:rounded-2xl rounded-t-3xl p-6">
 <div class="flex items-center justify-between mb-6">
-<h2 class="text-xl font-bold text-gray-800">Ajouter un contact</h2>
+<h2 class="text-xl font-bold text-gray-800">Ajouter un contact +</h2>
 <button onclick="hideAddContact()" class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-500">
 <i class="fas fa-times"></i>
 </button>
@@ -210,7 +210,7 @@ Continuer !!!
 </div>
 </div>
 <button type="submit" class="w-full py-4 gradient-bg text-white font-bold rounded-xl">
-<i class="fas fa-plus mr-2"></i>Ajouter le contact
+<i class="fas fa-plus mr-2"></i>Add ! | My Friend
 </button>
 </form>
 </div>
@@ -243,7 +243,7 @@ Continuer !!!
 
 <div class="bg-white border-t p-4">
 <div class="flex items-center gap-3 max-w-lg mx-auto">
-<input type="text" id="message-input" placeholder="Écrivez un message..." class="flex-1 px-4 py-3 bg-gray-100 rounded-full focus:ring-2 focus:ring-primary-500 outline-none" onkeypress="if(event.key === 'Enter') sendMessage()"/>
+<input type="text" id="message-input" placeholder="Parler..." class="flex-1 px-4 py-3 bg-gray-100 rounded-full focus:ring-2 focus:ring-primary-500 outline-none" onkeypress="if(event.key === 'Enter') sendMessage()"/>
 <button onclick="sendMessage()" class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center text-white shadow-lg">
 <i class="fas fa-paper-plane"></i>
 </button>
@@ -257,13 +257,13 @@ Continuer !!!
 <div class="bg-white rounded-3xl p-8 max-w-sm text-center">
 <div id="incoming-avatar" class="w-24 h-24 gradient-bg rounded-full flex items-center justify-center mx-auto mb-4 text-4xl text-white font-bold"></div>
 <h2 id="incoming-name" class="text-2xl font-bold text-gray-800 mb-2"></h2>
-<p class="text-gray-500 mb-6">vous appelle...</p>
+<p class="text-gray-500 mb-6">Vous appelle !!! 📞 !</p>
 <div class="flex gap-4 justify-center">
 <button onclick="acceptCall()" class="px-8 py-4 bg-green-500 text-white font-bold rounded-xl hover:bg-green-600">
-<i class="fas fa-phone mr-2"></i>Accepter
+<i class="fas fa-phone mr-2"></i><img src="https://pixabay.com/fr/images/download/openclipart-vectors-check-153363.png">
 </button>
 <button onclick="rejectCall()" class="px-8 py-4 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600">
-<i class="fas fa-phone-slash mr-2"></i>Refuser
+<i class="fas fa-phone-slash mr-2"></i><img src="https://pixabay.com/fr/images/download/samuel1983-x-1152114_1920.png">
 </button>
 </div>
 </div>
@@ -279,7 +279,7 @@ Continuer !!!
 <span id="call-avatar-letter"></span>
 </div>
 <h2 id="call-contact-name" class="text-white text-2xl font-bold mb-2"></h2>
-<p id="call-status" class="text-white/70">Appel en cours...</p>
+<p id="call-status" class="text-white/70">Calling...</p>
 </div>
 </div>
 
@@ -325,7 +325,7 @@ Continuer !!!
 </div>
 <div class="space-y-3 mb-6">
 <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-<span class="text-gray-600"><i class="fas fa-user mr-3 text-primary-500"></i>Nom complet</span>
+<span class="text-gray-600"><i class="fas fa-user mr-3 text-primary-500"></i>first name</span>
 <span id="profile-full-name" class="font-semibold text-gray-800"></span>
 </div>
 <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
@@ -334,7 +334,7 @@ Continuer !!!
 </div>
 </div>
 <button onclick="logout()" class="w-full py-4 bg-red-50 text-red-600 font-semibold rounded-xl hover:bg-red-100">
-<i class="fas fa-sign-out-alt mr-2"></i>Se déconnecter
+<i class="fas fa-sign-out-alt mr-2"></i>Log out
 </button>
 </div>
 </div>
